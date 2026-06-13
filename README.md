@@ -4,6 +4,10 @@ GRACE Design Studio is an OpenAI Apps SDK application for creating apparel
 concepts, artwork, garment mockups, and production tech pack summaries inside
 ChatGPT.
 
+The interactive design card includes controls to generate artwork and garment
+mockups after a concept is created. Asking ChatGPT for a "complete design" or a
+"visual mockup" also guides it through the full image workflow.
+
 ## Tools
 
 - `create_design_concept`
@@ -28,5 +32,11 @@ The included `render.yaml` can deploy the app as a Render web service. Set
 `OPENAI_API_KEY` as a secret environment variable in Render. After deployment,
 connect `https://YOUR-SERVICE.onrender.com/mcp` as a custom app in ChatGPT
 developer mode.
+
+Production pages:
+
+- `/privacy`
+- `/terms`
+- `/support`
 
 Never commit `.env.local` or an API key.
