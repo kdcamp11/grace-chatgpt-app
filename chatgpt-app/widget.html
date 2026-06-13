@@ -215,6 +215,42 @@
         text-align: center;
       }
 
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 15px;
+        color: white;
+        background: #184d3e;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 750;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        color: #184d3e;
+        background: #e2ece7;
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.58;
+      }
+
+      .action-message {
+        width: 100%;
+        margin: 2px 0 0;
+        color: #6a7b74;
+        font-size: 11px;
+      }
+
       @media (max-width: 460px) {
         .hero {
           grid-template-columns: 1fr;
@@ -282,6 +318,7 @@
 
       const render = (concept) => {
         if (!concept) return
+        currentConcept = concept
         titleEl.textContent = `${concept.brandName} ${concept.garmentType}`
         statusEl.textContent = concept.status === "ready-for-artwork" ? "Ready for artwork" : "Concept"
         contentEl.innerHTML = `
@@ -309,13 +346,27 @@
             <div class="detail"><dt>Audience</dt><dd>${escapeHtml(concept.audience)}</dd></div>
             <div class="detail" style="grid-column: 1 / -1"><dt>Notes</dt><dd>${escapeHtml(concept.notes)}</dd></div>
           </dl>
+          <div class="actions">
+            <button type="button" data-tool="generate_logo_artwork">
+              ${concept.artworkImage ? "Regenerate artwork" : "Generate artwork"}
+            </button>
+            <button type="button" class="secondary" data-tool="generate_garment_mockup">
+              ${concept.mockupImage ? "Regenerate mockup" : "Generate mockup"}
+            </button>
+            <p class="action-message" id="action-message">Choose a visual to continue this concept.</p>
+          </div>
         `
+
+        contentEl.querySelectorAll("[data-tool]").forEach((button) => {
+          button.addEventListener("click", () => runDesignTool(button.dataset.tool))
+        })
       }
 
       const updateFromResponse = (response) => {
-        render(response?.structuredContent?.concept ?? response?.concept)
+        render(response?._meta?.concept ?? response?.structuredContent?.concept ?? response?.concept)
       }
 
+      let currentConcept = null
       let rpcId = 0
       const pendingRequests = new Map()
       const rpcNotify = (method, params) => {
@@ -327,6 +378,31 @@
           pendingRequests.set(id, { resolve, reject })
           window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*")
         })
+
+      const runDesignTool = async (toolName) => {
+        if (!currentConcept?.id) return
+        const buttons = [...contentEl.querySelectorAll("button")]
+        const message = document.querySelector("#action-message")
+        buttons.forEach((button) => { button.disabled = true })
+        if (message) {
+          message.textContent =
+            toolName === "generate_logo_artwork"
+              ? "Creating your artwork..."
+              : "Creating your garment mockup..."
+        }
+
+        try {
+          const result = await rpcRequest("tools/call", {
+            name: toolName,
+            arguments: { id: currentConcept.id },
+          })
+          updateFromResponse(result)
+        } catch (error) {
+          buttons.forEach((button) => { button.disabled = false })
+          if (message) message.textContent = "The image could not be generated. Please try again."
+          console.error("Design generation failed:", error)
+        }
+      }
 
       window.addEventListener(
         "message",
