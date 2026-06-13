@@ -1,0 +1,19 @@
+{
+  "name": "grace-chatgpt-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local chatgpt-app/server.mjs",
+    "start": "node --env-file-if-exists=.env.local chatgpt-app/server.mjs",
+    "check": "node --check chatgpt-app/server.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.4",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
+  }
+}
