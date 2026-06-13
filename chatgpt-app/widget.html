@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GRACE Design Concept</title>
+    <style>
+      :root {
+        color: #10251e;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 12px;
+        background: transparent;
+      }
+
+      .card {
+        overflow: hidden;
+        border: 1px solid rgba(24, 77, 62, 0.16);
+        border-radius: 22px;
+        background:
+          radial-gradient(circle at top right, rgba(197, 165, 106, 0.2), transparent 34%),
+          linear-gradient(145deg, #fbfdfb 0%, #eef5f1 100%);
+        box-shadow: 0 16px 40px rgba(16, 37, 30, 0.1);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        color: white;
+        background: #184d3e;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .mark {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 10px;
+        color: #184d3e;
+        background: #f5efe3;
+        font-weight: 900;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 2px 0 0;
+        font-size: 17px;
+        line-height: 1.2;
+      }
+
+      .status {
+        flex: none;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: #f5efe3;
+        background: rgba(255, 255, 255, 0.1);
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(130px, 0.65fr);
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .asset {
+        overflow: hidden;
+        margin: 0;
+        border: 1px solid rgba(24, 77, 62, 0.12);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .asset img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: contain;
+        background: #f8f7f2;
+      }
+
+      .asset figcaption {
+        padding: 9px 12px;
+        color: #173d32;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .direction,
+      .swatch {
+        min-height: 118px;
+        border: 1px solid rgba(24, 77, 62, 0.12);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .direction {
+        padding: 16px;
+      }
+
+      .label {
+        margin: 0 0 6px;
+        color: #6a7b74;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .direction p:last-child {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 760;
+        line-height: 1.25;
+      }
+
+      .swatch {
+        display: grid;
+        padding: 16px;
+        place-items: center;
+        text-align: center;
+      }
+
+      .swatch-circle {
+        width: 54px;
+        height: 54px;
+        margin-bottom: 8px;
+        border: 4px solid white;
+        border-radius: 50%;
+        background: #1a1a1a;
+        box-shadow: 0 4px 14px rgba(16, 37, 30, 0.2);
+      }
+
+      .swatch strong {
+        display: block;
+        font-size: 12px;
+      }
+
+      dl {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1px;
+        overflow: hidden;
+        margin: 0;
+        border: 1px solid rgba(24, 77, 62, 0.12);
+        border-radius: 16px;
+        background: rgba(24, 77, 62, 0.12);
+      }
+
+      .detail {
+        min-height: 72px;
+        padding: 12px 14px;
+        background: rgba(255, 255, 255, 0.84);
+      }
+
+      dt {
+        color: #6a7b74;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      dd {
+        margin: 5px 0 0;
+        color: #173d32;
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 1.35;
+      }
+
+      .empty {
+        padding: 28px 20px;
+        color: #6a7b74;
+        text-align: center;
+      }
+
+      @media (max-width: 460px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        dl {
+          grid-template-columns: 1fr;
+        }
+
+        .gallery {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="card">
+      <header>
+        <div class="brand">
+          <div class="mark">G</div>
+          <div>
+            <p class="eyebrow">GRACE Design Studio</p>
+            <h1 id="title">Apparel concept</h1>
+          </div>
+        </div>
+        <span class="status" id="status">Concept</span>
+      </header>
+      <main id="content">
+        <div class="empty">Creating your design concept...</div>
+      </main>
+    </section>
+
+    <script type="module">
+      const titleEl = document.querySelector("#title")
+      const statusEl = document.querySelector("#status")
+      const contentEl = document.querySelector("#content")
+
+      const escapeHtml = (value) =>
+        String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;")
+
+      const colorValue = (value) => {
+        const colors = {
+          black: "#171717",
+          white: "#f4f1e8",
+          cream: "#e8ddc6",
+          navy: "#17264c",
+          blue: "#315d91",
+          red: "#8c2727",
+          green: "#184d3e",
+          gray: "#777b7a",
+          grey: "#777b7a",
+          brown: "#6f4b36",
+          purple: "#5b3d75",
+          pink: "#d58fa8",
+        }
+        const normalized = String(value ?? "").toLowerCase()
+        const match = Object.keys(colors).find((name) => normalized.includes(name))
+        return match ? colors[match] : "#184d3e"
+      }
+
+      const render = (concept) => {
+        if (!concept) return
+        titleEl.textContent = `${concept.brandName} ${concept.garmentType}`
+        statusEl.textContent = concept.status === "ready-for-artwork" ? "Ready for artwork" : "Concept"
+        contentEl.innerHTML = `
+          ${(concept.artworkImage || concept.mockupImage) ? `
+            <div class="gallery">
+              ${concept.artworkImage ? `<figure class="asset"><img src="${escapeHtml(concept.artworkImage)}" alt="Generated brand artwork"><figcaption>Brand artwork</figcaption></figure>` : ""}
+              ${concept.mockupImage ? `<figure class="asset"><img src="${escapeHtml(concept.mockupImage)}" alt="Generated garment mockup"><figcaption>Garment mockup</figcaption></figure>` : ""}
+            </div>
+          ` : ""}
+          <div class="hero">
+            <div class="direction">
+              <p class="label">Creative direction</p>
+              <p>${escapeHtml(concept.designDirection)}</p>
+            </div>
+            <div class="swatch">
+              <div class="swatch-circle" style="background:${colorValue(concept.garmentColor)}"></div>
+              <p class="label">Garment color</p>
+              <strong>${escapeHtml(concept.garmentColor)}</strong>
+            </div>
+          </div>
+          <dl>
+            <div class="detail"><dt>Garment</dt><dd>${escapeHtml(concept.garmentType)}</dd></div>
+            <div class="detail"><dt>Placement</dt><dd>${escapeHtml(concept.placement)}</dd></div>
+            <div class="detail"><dt>Decoration</dt><dd>${escapeHtml(concept.decorationMethod)}</dd></div>
+            <div class="detail"><dt>Audience</dt><dd>${escapeHtml(concept.audience)}</dd></div>
+            <div class="detail" style="grid-column: 1 / -1"><dt>Notes</dt><dd>${escapeHtml(concept.notes)}</dd></div>
+          </dl>
+        `
+      }
+
+      const updateFromResponse = (response) => {
+        render(response?.structuredContent?.concept ?? response?.concept)
+      }
+
+      let rpcId = 0
+      const pendingRequests = new Map()
+      const rpcNotify = (method, params) => {
+        window.parent.postMessage({ jsonrpc: "2.0", method, params }, "*")
+      }
+      const rpcRequest = (method, params) =>
+        new Promise((resolve, reject) => {
+          const id = ++rpcId
+          pendingRequests.set(id, { resolve, reject })
+          window.parent.postMessage({ jsonrpc: "2.0", id, method, params }, "*")
+        })
+
+      window.addEventListener(
+        "message",
+        (event) => {
+          if (event.source !== window.parent) return
+          const message = event.data
+          if (!message || message.jsonrpc !== "2.0") return
+
+          if (typeof message.id === "number") {
+            const pending = pendingRequests.get(message.id)
+            if (!pending) return
+            pendingRequests.delete(message.id)
+            if (message.error) {
+              pending.reject(message.error)
+            } else {
+              pending.resolve(message.result)
+            }
+            return
+          }
+
+          if (message.method === "ui/notifications/tool-result") {
+            updateFromResponse(message.params)
+          }
+        },
+        { passive: true },
+      )
+
+      if (window.openai?.toolOutput) {
+        updateFromResponse(window.openai.toolOutput)
+      }
+
+      try {
+        await rpcRequest("ui/initialize", {
+          appInfo: { name: "grace-design-concept", version: "0.1.0" },
+          appCapabilities: {},
+          protocolVersion: "2026-01-26",
+        })
+        rpcNotify("ui/notifications/initialized", {})
+      } catch (error) {
+        console.error("Failed to initialize the MCP Apps bridge:", error)
+      }
+    </script>
+  </body>
+</html>
