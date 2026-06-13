@@ -10,10 +10,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import { z } from 'zod'
 
-const WIDGET_URI = 'ui://widget/grace-design-concept.html'
+const WIDGET_URI = 'ui://widget/grace-design-concept-v2.html'
 const MCP_PATH = '/mcp'
+const APP_ORIGIN = 'https://grace-chatgpt-app.onrender.com'
 const port = Number(process.env.PORT ?? 8787)
-const host = process.env.HOST ?? '127.0.0.1'
+const host = process.env.HOST ?? '0.0.0.0'
 const widgetHtml = readFileSync(
   fileURLToPath(new URL('./widget.html', import.meta.url)),
   'utf8',
@@ -37,7 +38,10 @@ const conceptSchema = z.object({
 })
 
 const outputSchema = {
-  concept: conceptSchema,
+  concept: conceptSchema.omit({
+    artworkImage: true,
+    mockupImage: true,
+  }),
 }
 
 function clean(value, fallback) {
@@ -45,9 +49,13 @@ function clean(value, fallback) {
 }
 
 function conceptResponse(concept, message) {
+  const { artworkImage, mockupImage, ...modelConcept } = concept
   return {
     content: [{ type: 'text', text: message }],
-    structuredContent: { concept },
+    structuredContent: { concept: modelConcept },
+    _meta: {
+      concept,
+    },
   }
 }
 
@@ -112,10 +120,16 @@ async function generateImage(prompt, referenceImage) {
 }
 
 function createGraceServer() {
-  const server = new McpServer({
-    name: 'grace-design-studio',
-    version: '0.1.0',
-  })
+  const server = new McpServer(
+    {
+      name: 'grace-design-studio',
+      version: '0.2.0',
+    },
+    {
+      instructions:
+        'GRACE creates apparel concepts, artwork, and garment mockups. If the user asks for a complete design or a visual, create the concept, then generate artwork, then generate a garment mockup. If the user asks only for a concept or says not to generate images, stop after the concept.',
+    },
+  )
 
   registerAppResource(
     server,
@@ -131,7 +145,14 @@ function createGraceServer() {
           _meta: {
             ui: {
               prefersBorder: false,
+              domain: APP_ORIGIN,
+              csp: {
+                connectDomains: [],
+                resourceDomains: [],
+              },
             },
+            'openai/widgetDescription':
+              'An interactive apparel design card that shows the concept, generated artwork, and garment mockup.',
           },
         },
       ],
@@ -156,6 +177,11 @@ function createGraceServer() {
         notes: z.string().optional().describe('Any extra creative or production requirements'),
       },
       outputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
       _meta: {
         ui: { resourceUri: WIDGET_URI },
       },
@@ -203,6 +229,11 @@ function createGraceServer() {
         readyForArtwork: z.boolean().optional().describe('Mark the concept ready for artwork'),
       },
       outputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
       _meta: {
         ui: { resourceUri: WIDGET_URI },
       },
@@ -269,8 +300,15 @@ function createGraceServer() {
           .describe('Specific wording, symbols, typography, or art direction'),
       },
       outputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
       _meta: {
         ui: { resourceUri: WIDGET_URI },
+        'openai/toolInvocation/invoking': 'Creating artwork...',
+        'openai/toolInvocation/invoked': 'Artwork created.',
       },
     },
     async (args) => {
@@ -325,8 +363,15 @@ function createGraceServer() {
         mockupNotes: z.string().optional().describe('Extra styling or photography instructions'),
       },
       outputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
       _meta: {
         ui: { resourceUri: WIDGET_URI },
+        'openai/toolInvocation/invoking': 'Creating garment mockup...',
+        'openai/toolInvocation/invoked': 'Garment mockup created.',
       },
     },
     async (args) => {
@@ -383,6 +428,11 @@ function createGraceServer() {
         quantity: z.string().optional().describe('Estimated order quantity'),
       },
       outputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+      },
       _meta: {
         ui: { resourceUri: WIDGET_URI },
       },
@@ -444,6 +494,42 @@ const httpServer = createServer(async (req, res) => {
     return
   }
 
+  if (req.method === 'GET' && url.pathname === '/privacy') {
+    res
+      .writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+      .end(policyPage('Privacy Policy', `
+        <p>GRACE Design Studio processes the apparel design details you provide so it can create concepts, artwork, mockups, and production summaries.</p>
+        <h2>Data we process</h2>
+        <p>Design prompts may include brand names, garment details, creative direction, and production notes. Please do not submit passwords, payment information, government identifiers, health information, or other sensitive personal data.</p>
+        <h2>How data is used and shared</h2>
+        <p>Design details are processed by the GRACE app server and OpenAI services solely to provide the requested result. We do not sell personal data or use it for advertising.</p>
+        <h2>Retention and controls</h2>
+        <p>Current design state is stored only in temporary server memory and may be erased whenever the service restarts or sleeps. You can stop using or disconnect the app at any time from ChatGPT settings.</p>
+      `))
+    return
+  }
+
+  if (req.method === 'GET' && url.pathname === '/terms') {
+    res
+      .writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+      .end(policyPage('Terms of Use', `
+        <p>GRACE Design Studio provides creative apparel concepts and production-planning assistance. Generated results may contain errors and should be reviewed before manufacturing, publishing, or commercial use.</p>
+        <p>You are responsible for ensuring that names, logos, artwork, and other materials you provide or use do not violate third-party rights. Do not use the app for unlawful, deceptive, or harmful content.</p>
+        <p>The service is provided as available and may change as the product develops.</p>
+      `))
+    return
+  }
+
+  if (req.method === 'GET' && url.pathname === '/support') {
+    res
+      .writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+      .end(policyPage('Support', `
+        <p>For help with GRACE Design Studio, report an issue through the public project support page.</p>
+        <p><a href="https://github.com/kdcamp11/grace-chatgpt-app/issues">Open the GRACE support page</a></p>
+      `))
+    return
+  }
+
   const mcpMethods = new Set(['POST', 'GET', 'DELETE'])
   if (url.pathname === MCP_PATH && req.method && mcpMethods.has(req.method)) {
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -478,3 +564,27 @@ const httpServer = createServer(async (req, res) => {
 httpServer.listen(port, host, () => {
   console.log(`GRACE ChatGPT app listening on http://${host}:${port}${MCP_PATH}`)
 })
+
+function policyPage(title, body) {
+  return `<!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>${title} | GRACE Design Studio</title>
+      <style>
+        body { max-width: 760px; margin: 0 auto; padding: 48px 24px; color: #10251e; background: #fbfdfb; font: 16px/1.65 Inter, system-ui, sans-serif; }
+        h1, h2 { color: #184d3e; line-height: 1.2; }
+        h1 { margin-bottom: 28px; }
+        h2 { margin-top: 30px; font-size: 20px; }
+        a { color: #184d3e; font-weight: 700; }
+        footer { margin-top: 44px; padding-top: 20px; border-top: 1px solid #d9e5df; color: #60736b; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <h1>${title}</h1>
+      ${body}
+      <footer>GRACE Design Studio · Effective June 12, 2026</footer>
+    </body>
+  </html>`
+}
